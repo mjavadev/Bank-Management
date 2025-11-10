@@ -6,9 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BankApp.Api.Controllers
 {
-
-    namespace WebApp.BankingApi.Controllers
-    {
         [Route("api/[controller]")]
         [ApiController]
         public class AccountController : ControllerBase
@@ -55,6 +52,3 @@ namespace BankApp.Api.Controllers
             public string NewPassword { get; set; }
         }
     }
-
-
-}
