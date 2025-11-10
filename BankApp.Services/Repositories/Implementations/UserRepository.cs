@@ -2,11 +2,13 @@
 using BankApp.Entity.Security;
 using BankApp.Services.Repositories.Interfaces;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WebApp.BankingApi.Entity.Models;
 
 namespace BankApp.Services.Repositories.Implementations
 {
@@ -14,11 +16,16 @@ namespace BankApp.Services.Repositories.Implementations
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly ApplicationDbContext _context;
 
-        public UserRepository(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
+        public UserRepository(
+            UserManager<ApplicationUser> userManager,
+            RoleManager<IdentityRole> roleManager,
+            ApplicationDbContext context)
         {
             _userManager = userManager;
             _roleManager = roleManager;
+            _context = context;
         }
 
         public async Task<Result<UserResponse>> Authenticate(UserRequest request)
@@ -32,11 +39,35 @@ namespace BankApp.Services.Repositories.Implementations
                 return response;
             }
 
+            if (!user.IsActive)
+            {
+                response.Errors.Add(new Errors { ErrorCode = "102", ErrorMessage = "Account is inactive. Please contact administrator." });
+                return response;
+            }
+
+            var roles = await _userManager.GetRolesAsync(user);
+            if (roles.Contains("Customer"))
+            {
+                var customer = await _context.Customers
+                    .FirstOrDefaultAsync(c => c.ApplicationUserID == user.Id && !c.IsDeleted);
+
+                if (customer == null)
+                {
+                    response.Errors.Add(new Errors { ErrorCode = "103", ErrorMessage = "Customer record not found" });
+                    return response;
+                }
+
+                if (!customer.IsActive)
+                {
+                    response.Errors.Add(new Errors { ErrorCode = "104", ErrorMessage = "Customer account is inactive" });
+                    return response;
+                }
+            }
+
             var result = await _userManager.CheckPasswordAsync(user, request.Password);
 
             if (result)
             {
-                var roles = await _userManager.GetRolesAsync(user);
                 response.Response = new UserResponse
                 {
                     Id = user.Id,
@@ -54,10 +85,32 @@ namespace BankApp.Services.Repositories.Implementations
             return response;
         }
 
+        //    var result = await _userManager.CheckPasswordAsync(user, request.Password);
+
+        //    if (result)
+        //    {
+        //        var roles = await _userManager.GetRolesAsync(user);
+        //        response.Response = new UserResponse
+        //        {
+        //            Id = user.Id,
+        //            UserName = user.UserName,
+        //            FullName = user.FullName,
+        //            Roles = roles.ToList(),
+        //            MustChangePassword = user.MustChangePassword
+        //        };
+        //    }
+        //    else
+        //    {
+        //        response.Errors.Add(new Errors { ErrorCode = "101", ErrorMessage = "Invalid Credential" });
+        //    }
+
+        //    return response;
+        //}
+
         public async Task<bool> IsAValidUser(string username, string password)
         {
             var user = await _userManager.FindByNameAsync(username);
-            if (user == null || user.IsDeleted)
+            if (user == null || user.IsDeleted || !user.IsActive)
                 return false;
 
             return await _userManager.CheckPasswordAsync(user, password);

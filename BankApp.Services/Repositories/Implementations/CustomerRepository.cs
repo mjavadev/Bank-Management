@@ -1,5 +1,7 @@
 ﻿using BankApp.Entity.Dto;
+using BankApp.Entity.Security;
 using BankApp.Services.Repositories.Interfaces;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -13,10 +15,12 @@ namespace BankApp.Services.Repositories.Implementations
     public class CustomerRepository : ICustomerRepository
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public CustomerRepository(ApplicationDbContext context)
+        public CustomerRepository(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         public async Task<Result<List<CustomerDto>>> GetAllCustomers()
@@ -36,13 +40,15 @@ namespace BankApp.Services.Repositories.Implementations
                         UserName = c.ApplicationUser.UserName,
                         FullName = c.ApplicationUser.FullName,
                         DateOfBirth = c.DateOfBirth,
+                        Gender = c.Gender,
                         Occupation = c.Occupation,
                         ApprovedByUserID = c.ApprovedByUserID,
                         ApprovedByName = c.ApprovedByUser != null ? c.ApprovedByUser.FullName : null,
                         ApprovalDate = c.ApprovalDate,
                         AadharNumber = c.AadharNumber,
                         PAN = c.PAN,
-                        CustomerImageURL = c.CustomerImageURL
+                        CustomerImageURL = c.CustomerImageURL,
+                        IsActive = c.IsActive
                     })
                     .ToListAsync();
 
@@ -73,13 +79,15 @@ namespace BankApp.Services.Repositories.Implementations
                         UserName = c.ApplicationUser.UserName,
                         FullName = c.ApplicationUser.FullName,
                         DateOfBirth = c.DateOfBirth,
+                        Gender = c.Gender,
                         Occupation = c.Occupation,
                         ApprovedByUserID = c.ApprovedByUserID,
                         ApprovedByName = c.ApprovedByUser != null ? c.ApprovedByUser.FullName : null,
                         ApprovalDate = c.ApprovalDate,
                         AadharNumber = c.AadharNumber,
                         PAN = c.PAN,
-                        CustomerImageURL = c.CustomerImageURL
+                        CustomerImageURL = c.CustomerImageURL,
+                        IsActive = c.IsActive
                     })
                     .FirstOrDefaultAsync();
 
@@ -117,13 +125,15 @@ namespace BankApp.Services.Repositories.Implementations
                         UserName = c.ApplicationUser.UserName,
                         FullName = c.ApplicationUser.FullName,
                         DateOfBirth = c.DateOfBirth,
+                        Gender = c.Gender,
                         Occupation = c.Occupation,
                         ApprovedByUserID = c.ApprovedByUserID,
                         ApprovedByName = c.ApprovedByUser != null ? c.ApprovedByUser.FullName : null,
                         ApprovalDate = c.ApprovalDate,
                         AadharNumber = c.AadharNumber,
                         PAN = c.PAN,
-                        CustomerImageURL = c.CustomerImageURL
+                        CustomerImageURL = c.CustomerImageURL,
+                        IsActive = c.IsActive
                     })
                     .FirstOrDefaultAsync();
 
@@ -158,6 +168,7 @@ namespace BankApp.Services.Repositories.Implementations
                 }
 
                 customer.DateOfBirth = customerDto.DateOfBirth;
+                customer.Gender = customerDto.Gender;
                 customer.Occupation = customerDto.Occupation;
                 customer.AadharNumber = customerDto.AadharNumber;
                 customer.PAN = customerDto.PAN;
@@ -202,8 +213,59 @@ namespace BankApp.Services.Repositories.Implementations
 
             return response;
         }
-    }
 
+        public async Task<Result<bool>> DeactivateCustomer(int id, string deletedBy)
+        {
+            Result<bool> response = new();
+
+            try
+            {
+                var customer = await _context.Customers
+                    .Include(c => c.Accounts)
+                    .FirstOrDefaultAsync(c => c.CustomerID == id);
+
+                if (customer == null)
+                {
+                    response.Errors.Add(new Errors { ErrorCode = "202", ErrorMessage = "Customer not found" });
+                    return response;
+                }
+
+                // Deactivate customer
+                customer.IsActive = false;
+                customer.IsDeleted = true;
+                customer.DeletedBy = deletedBy;
+                customer.DeletedDate = DateTime.Now;
+
+                // Deactivate all customer accounts
+                foreach (var account in customer.Accounts.Where(a => !a.IsDeleted))
+                {
+                    account.IsActive = false;
+                    account.IsDeleted = true;
+                    account.DeletedBy = deletedBy;
+                    account.DeletedDate = DateTime.Now;
+                    account.Status = "Inactive";
+                }
+
+                // Deactivate user in AspNetUsers
+                var user = await _userManager.FindByIdAsync(customer.ApplicationUserID);
+                if (user != null)
+                {
+                    user.IsActive = false;
+                    await _userManager.UpdateAsync(user);
+                }
+
+                await _context.SaveChangesAsync();
+                response.Response = true;
+            }
+            catch (Exception ex)
+            {
+                response.Errors.Add(new Errors { ErrorCode = "201", ErrorMessage = ex.Message });
+            }
+
+            return response;
+        }
+    }
 }
+
 
 

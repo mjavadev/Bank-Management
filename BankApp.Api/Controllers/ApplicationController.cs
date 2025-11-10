@@ -48,7 +48,7 @@ namespace BankApp.Api.Controllers
             return Ok(result);
         }
 
-        [Authorize(Roles = "Admin,Manager")]
+        //[Authorize(Roles = "Admin,Manager")]
         [HttpGet]
         public async Task<IActionResult> GetAllApplications()
         {
@@ -56,7 +56,7 @@ namespace BankApp.Api.Controllers
             return Ok(result);
         }
 
-        [Authorize(Roles = "Admin,Manager")]
+      //  [Authorize(Roles = "Admin,Manager")]
         [HttpGet("pending")]
         public async Task<IActionResult> GetPendingApplications()
         {
@@ -64,7 +64,7 @@ namespace BankApp.Api.Controllers
             return Ok(result);
         }
 
-        [Authorize(Roles = "Admin,Manager")]
+      //  [Authorize(Roles = "Admin,Manager")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetApplicationById(int id)
         {
@@ -72,7 +72,7 @@ namespace BankApp.Api.Controllers
             return Ok(result);
         }
 
-        [Authorize(Roles = "Admin,Manager")]
+     //   [Authorize(Roles = "Admin,Manager")]
         [HttpPost("approve/{id}")]
         public async Task<IActionResult> ApproveApplication(int id)
         {
@@ -81,7 +81,7 @@ namespace BankApp.Api.Controllers
             return Ok(result);
         }
 
-        [Authorize(Roles = "Admin,Manager")]
+       // [Authorize(Roles = "Admin,Manager")]
         [HttpPost("reject/{id}")]
         public async Task<IActionResult> RejectApplication(int id, [FromBody] RejectRequest request)
         {

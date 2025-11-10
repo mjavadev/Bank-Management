@@ -38,6 +38,8 @@ namespace BankApp.Entity.Models
         [MaxLength(10)]
         public string Status { get; set; } = "Active";
 
+        public bool IsActive { get; set; } = true;
+
         public ICollection<Transaction> Transactions { get; set; }
 
     }

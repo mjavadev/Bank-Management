@@ -23,15 +23,16 @@ options.UseSqlServer(connectionString));
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(option =>
 {
     option.Password.RequiredLength = 7;
-    option.Password.RequireDigit = true;
-    option.Password.RequireUppercase = true;
-    option.Password.RequireNonAlphanumeric = true;
+    //option.Password.RequireDigit = true;
+    //option.Password.RequireUppercase = true;
+    //option.Password.RequireNonAlphanumeric = true;
 }).AddEntityFrameworkStores<ApplicationDbContext>();
 
 builder.Services.AddAuthentication("Basic")
     .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("Basic", null);
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IBankAccountRepository, BankAccountRepository>();
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 builder.Services.AddScoped<IApplicationRepository, ApplicationRepository>();

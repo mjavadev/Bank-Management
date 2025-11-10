@@ -146,6 +146,26 @@ namespace WebApp.BankingApi.Entity.Models
                 .HasForeignKey(t => t.RecipientAccountID)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            builder.Entity<Customer>()
+        .HasIndex(c => c.MobileNumber)
+        .IsUnique()
+        .HasFilter("[IsDeleted]=0");
+            builder.Entity<Customer>()
+                .HasIndex(c => c.AadharNumber)
+                .IsUnique()
+                .HasFilter("[IsDeleted]=0");
+            builder.Entity<Customer>()
+                .HasIndex(c => c.PAN)
+                .IsUnique()
+                .HasFilter("[IsDeleted]=0");
+            // ---- Indexes for CustomerApplications validation ----
+            builder.Entity<CustomerApplication>()
+                .HasIndex(a => a.MobileNumber);
+            builder.Entity<CustomerApplication>()
+                .HasIndex(a => a.AadharNumber);
+            builder.Entity<CustomerApplication>()
+                .HasIndex(a => a.PAN);
+
             var adminId = Guid.NewGuid().ToString();
             var adminUser = new ApplicationUser
             {
