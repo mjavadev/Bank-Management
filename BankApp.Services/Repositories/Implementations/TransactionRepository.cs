@@ -290,11 +290,6 @@ namespace BankApp.Services.Repositories.Implementations
 
             try
             {
-                //var transaction = await _context.Transactions
-                //    .Include(t => t.Account)
-                //    .Include(t => t.RecipientAccount)
-                //    .FirstOrDefaultAsync(t => t.TransactionID == transactionId);
-
                 var transaction = await _context.Transactions
                     .Include(t => t.Account)
                         .ThenInclude(a => a.Customer)

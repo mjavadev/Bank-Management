@@ -40,14 +40,6 @@ namespace BankApp.Api.Controllers
             return Ok(result);
         }
 
-        //[HttpPut]
-        //public async Task<IActionResult> UpdateEmployee([FromBody] EmployeeDto employee)
-        //{
-        //    var userId = User.FindFirst("UserId")?.Value;
-        //    var result = await _employeeRepository.UpdateEmployee(employee, userId);
-        //    return Ok(result);
-        //}
-
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateEmployee(int id, [FromBody] EmployeeDto employee)
         {

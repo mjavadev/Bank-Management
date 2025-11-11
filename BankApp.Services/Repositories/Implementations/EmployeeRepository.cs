@@ -146,36 +146,6 @@ namespace BankApp.Services.Repositories.Implementations
             return response;
         }
 
-        //public async Task<Result<bool>> UpdateEmployee(EmployeeDto employeeDto, string modifiedBy)
-        //{
-        //    Result<bool> response = new();
-
-        //    try
-        //    {
-        //        var employee = await _context.Employees.FindAsync(employeeDto.EmployeeID);
-        //        if (employee == null || employee.IsDeleted)
-        //        {
-        //            response.Errors.Add(new Errors { ErrorCode = "302", ErrorMessage = "Employee not found" });
-        //            return response;
-        //        }
-
-        //        employee.StaffCode = employeeDto.StaffCode;
-        //        employee.JobTitle = employeeDto.JobTitle;
-        //        employee.DateHired = employeeDto.DateHired;
-        //        employee.ModifiedBy = modifiedBy;
-        //        employee.ModifiedDate = DateTime.Now;
-
-        //        await _context.SaveChangesAsync();
-        //        response.Response = true;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        response.Errors.Add(new Errors { ErrorCode = "301", ErrorMessage = ex.Message });
-        //    }
-
-        //    return response;
-        //}
-
         public async Task<Result<bool>> UpdateEmployee(int id, EmployeeDto employeeDto, string modifiedBy)
         {
             Result<bool> response = new();

@@ -85,28 +85,6 @@ namespace BankApp.Services.Repositories.Implementations
             return response;
         }
 
-        //    var result = await _userManager.CheckPasswordAsync(user, request.Password);
-
-        //    if (result)
-        //    {
-        //        var roles = await _userManager.GetRolesAsync(user);
-        //        response.Response = new UserResponse
-        //        {
-        //            Id = user.Id,
-        //            UserName = user.UserName,
-        //            FullName = user.FullName,
-        //            Roles = roles.ToList(),
-        //            MustChangePassword = user.MustChangePassword
-        //        };
-        //    }
-        //    else
-        //    {
-        //        response.Errors.Add(new Errors { ErrorCode = "101", ErrorMessage = "Invalid Credential" });
-        //    }
-
-        //    return response;
-        //}
-
         public async Task<bool> IsAValidUser(string username, string password)
         {
             var user = await _userManager.FindByNameAsync(username);
