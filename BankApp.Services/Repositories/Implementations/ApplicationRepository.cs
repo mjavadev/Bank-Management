@@ -934,6 +934,41 @@ namespace BankApp.Services.Repositories.Implementations
                 .Select(s => s[random.Next(s.Length)]).ToArray());
         }
 
+        /* public async Task<Result<bool>> RejectApplication(int applicationId, string rejectedBy, string reason)
+         {
+             Result<bool> response = new();
+
+             try
+             {
+                 var application = await _context.CustomerApplications.FindAsync(applicationId);
+                 if (application == null || application.IsDeleted)
+                 {
+                     response.Errors.Add(new Errors { ErrorCode = "402", ErrorMessage = "Application not found" });
+                     return response;
+                 }
+
+                 if (application.Status != ApplicationStatus.Pending)
+                 {
+                     response.Errors.Add(new Errors { ErrorCode = "403", ErrorMessage = "Application already processed" });
+                     return response;
+                 }
+
+                 application.Status = ApplicationStatus.Rejected;
+                 application.ApprovedByUserID = rejectedBy;
+                 application.ApprovalDate = DateTime.Now;
+                 application.RejectionReason = reason;
+
+                 await _context.SaveChangesAsync();
+                 response.Response = true;
+             }
+             catch (Exception ex)
+             {
+                 response.Errors.Add(new Errors { ErrorCode = "401", ErrorMessage = ex.Message });
+             }
+
+             return response;
+         }*/
+
         public async Task<Result<bool>> RejectApplication(int applicationId, string rejectedBy, string reason)
         {
             Result<bool> response = new();
@@ -943,33 +978,65 @@ namespace BankApp.Services.Repositories.Implementations
                 var application = await _context.CustomerApplications.FindAsync(applicationId);
                 if (application == null || application.IsDeleted)
                 {
-                    response.Errors.Add(new Errors { ErrorCode = "402", ErrorMessage = "Application not found" });
+                    response.Errors.Add(new Errors
+                    {
+                        ErrorCode = "402",
+                        ErrorMessage = "Application not found"
+                    });
                     return response;
                 }
 
                 if (application.Status != ApplicationStatus.Pending)
                 {
-                    response.Errors.Add(new Errors { ErrorCode = "403", ErrorMessage = "Application already processed" });
+                    response.Errors.Add(new Errors
+                    {
+                        ErrorCode = "403",
+                        ErrorMessage = "Application already processed"
+                    });
                     return response;
                 }
 
+                // Validate rejection reason
+                if (string.IsNullOrWhiteSpace(reason))
+                {
+                    response.Errors.Add(new Errors
+                    {
+                        ErrorCode = "421",
+                        ErrorMessage = "Rejection reason is required"
+                    });
+                    return response;
+                }
+
+                // Update application status
                 application.Status = ApplicationStatus.Rejected;
                 application.ApprovedByUserID = rejectedBy;
                 application.ApprovalDate = DateTime.Now;
-                application.RejectionReason = reason;
+                application.RejectionReason = reason.Trim();
+
+                // Soft delete the application
+                application.IsDeleted = true;
+                application.DeletedBy = rejectedBy;
+                application.DeletedDate = DateTime.Now;
+                application.ModifiedBy = rejectedBy;
+                application.ModifiedDate = DateTime.Now;
 
                 await _context.SaveChangesAsync();
                 response.Response = true;
             }
             catch (Exception ex)
             {
-                response.Errors.Add(new Errors { ErrorCode = "401", ErrorMessage = ex.Message });
+                response.Errors.Add(new Errors
+                {
+                    ErrorCode = "401",
+                    ErrorMessage = ex.Message
+                });
             }
 
             return response;
         }
 
-        
+
+
     }
 
 }
