@@ -12,7 +12,8 @@ namespace BankApp.Services.Repositories.Interfaces
         Task<Result<List<EmployeeDto>>> GetAllEmployees();
         Task<Result<EmployeeDto>> GetEmployeeById(int id);
         Task<Result<EmployeeDto>> CreateEmployee(EmployeeDto employee, string createdBy);
-        Task<Result<bool>> UpdateEmployee(EmployeeDto employee, string modifiedBy);
+      //  Task<Result<bool>> UpdateEmployee(EmployeeDto employee, string modifiedBy);
+        Task<Result<bool>> UpdateEmployee(int id, EmployeeDto employee, string modifiedBy);
         Task<Result<bool>> DeleteEmployee(int id, string deletedBy);
     }
 }

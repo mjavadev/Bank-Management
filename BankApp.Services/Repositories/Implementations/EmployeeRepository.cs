@@ -146,17 +146,86 @@ namespace BankApp.Services.Repositories.Implementations
             return response;
         }
 
-        public async Task<Result<bool>> UpdateEmployee(EmployeeDto employeeDto, string modifiedBy)
+        //public async Task<Result<bool>> UpdateEmployee(EmployeeDto employeeDto, string modifiedBy)
+        //{
+        //    Result<bool> response = new();
+
+        //    try
+        //    {
+        //        var employee = await _context.Employees.FindAsync(employeeDto.EmployeeID);
+        //        if (employee == null || employee.IsDeleted)
+        //        {
+        //            response.Errors.Add(new Errors { ErrorCode = "302", ErrorMessage = "Employee not found" });
+        //            return response;
+        //        }
+
+        //        employee.StaffCode = employeeDto.StaffCode;
+        //        employee.JobTitle = employeeDto.JobTitle;
+        //        employee.DateHired = employeeDto.DateHired;
+        //        employee.ModifiedBy = modifiedBy;
+        //        employee.ModifiedDate = DateTime.Now;
+
+        //        await _context.SaveChangesAsync();
+        //        response.Response = true;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        response.Errors.Add(new Errors { ErrorCode = "301", ErrorMessage = ex.Message });
+        //    }
+
+        //    return response;
+        //}
+
+        public async Task<Result<bool>> UpdateEmployee(int id, EmployeeDto employeeDto, string modifiedBy)
         {
             Result<bool> response = new();
 
             try
             {
-                var employee = await _context.Employees.FindAsync(employeeDto.EmployeeID);
+                // Validate that ID in route matches ID in DTO (optional but recommended)
+                if (id != employeeDto.EmployeeID)
+                {
+                    response.Errors.Add(new Errors
+                    {
+                        ErrorCode = "303",
+                        ErrorMessage = "Employee ID mismatch"
+                    });
+                    return response;
+                }
+
+                var employee = await _context.Employees.FindAsync(id);
                 if (employee == null || employee.IsDeleted)
                 {
-                    response.Errors.Add(new Errors { ErrorCode = "302", ErrorMessage = "Employee not found" });
+                    response.Errors.Add(new Errors
+                    {
+                        ErrorCode = "302",
+                        ErrorMessage = "Employee not found"
+                    });
                     return response;
+                }
+
+                var employeeData = await _context.Employees
+                .Include(e => e.ApplicationUser) 
+                .FirstOrDefaultAsync(e => e.EmployeeID == id);
+
+                // Update ApplicationUser.FullName with simple validation
+                if (!string.IsNullOrWhiteSpace(employeeDto.FullName))
+                {
+                    var trimmedName = employeeDto.FullName.Trim();
+
+                    if (trimmedName.Length >= 2 && trimmedName.Length <= 100)
+                    {
+                        employee.ApplicationUser.FullName = trimmedName;
+                    }
+                    else
+                    {
+                        response.Errors.Add(new Errors
+                        {
+                            ErrorCode = "304",
+                            ErrorMessage = "Full name must be between 2 and 100 characters"
+                        });
+                        return response;
+                    }
                 }
 
                 employee.StaffCode = employeeDto.StaffCode;
@@ -170,11 +239,16 @@ namespace BankApp.Services.Repositories.Implementations
             }
             catch (Exception ex)
             {
-                response.Errors.Add(new Errors { ErrorCode = "301", ErrorMessage = ex.Message });
+                response.Errors.Add(new Errors
+                {
+                    ErrorCode = "301",
+                    ErrorMessage = ex.Message
+                });
             }
 
             return response;
         }
+
 
         public async Task<Result<bool>> DeleteEmployee(int id, string deletedBy)
         {

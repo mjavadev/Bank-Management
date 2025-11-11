@@ -157,19 +157,72 @@ namespace BankApp.Services.Repositories.Implementations
             return response;
         }
 
-        public async Task<Result<bool>> UpdateCustomer(CustomerDto customerDto, string modifiedBy)
+        /* public async Task<Result<bool>> UpdateCustomer(CustomerDto customerDto, string modifiedBy)
+         {
+             Result<bool> response = new();
+
+             try
+             {
+                 var customer = await _context.Customers.FindAsync(customerDto.CustomerID);
+                 if (customer == null || customer.IsDeleted)
+                 {
+                     response.Errors.Add(new Errors { ErrorCode = "202", ErrorMessage = "Customer not found" });
+                     return response;
+                 }
+
+                 customer.DateOfBirth = customerDto.DateOfBirth;
+                 customer.Gender = customerDto.Gender;
+                 customer.Occupation = customerDto.Occupation;
+                 customer.MobileNumber = customerDto.MobileNumber;
+                 customer.AadharNumber = customerDto.AadharNumber;
+                 customer.PAN = customerDto.PAN;
+                 customer.ModifiedBy = modifiedBy;
+                 customer.ModifiedDate = DateTime.Now;
+
+                 await _context.SaveChangesAsync();
+                 response.Response = true;
+             }
+             catch (Exception ex)
+             {
+                 response.Errors.Add(new Errors { ErrorCode = "201", ErrorMessage = ex.Message });
+             }
+
+             return response;
+         }*/
+
+        public async Task<Result<bool>> UpdateCustomer(int id, CustomerDto customerDto, string modifiedBy)
         {
             Result<bool> response = new();
 
             try
             {
-                var customer = await _context.Customers.FindAsync(customerDto.CustomerID);
-                if (customer == null || customer.IsDeleted)
+                // Validate that ID in route matches ID in DTO
+                if (id != customerDto.CustomerID)
                 {
-                    response.Errors.Add(new Errors { ErrorCode = "202", ErrorMessage = "Customer not found" });
+                    response.Errors.Add(new Errors
+                    {
+                        ErrorCode = "203",
+                        ErrorMessage = "Customer ID mismatch"
+                    });
                     return response;
                 }
 
+                // Load customer WITH ApplicationUser navigation property
+                var customer = await _context.Customers
+                    .Include(c => c.ApplicationUser)  // ← Load related user
+                    .FirstOrDefaultAsync(c => c.CustomerID == id);
+
+                if (customer == null || customer.IsDeleted)
+                {
+                    response.Errors.Add(new Errors
+                    {
+                        ErrorCode = "202",
+                        ErrorMessage = "Customer not found"
+                    });
+                    return response;
+                }
+
+                // Update Customer fields
                 customer.DateOfBirth = customerDto.DateOfBirth;
                 customer.Gender = customerDto.Gender;
                 customer.Occupation = customerDto.Occupation;
@@ -179,16 +232,28 @@ namespace BankApp.Services.Repositories.Implementations
                 customer.ModifiedBy = modifiedBy;
                 customer.ModifiedDate = DateTime.Now;
 
+                // Update ApplicationUser.FullName if provided
+                if (!string.IsNullOrEmpty(customerDto.FullName))
+                {
+                    customer.ApplicationUser.FullName = customerDto.FullName;
+                }
+
+                // Save both Customer and ApplicationUser changes
                 await _context.SaveChangesAsync();
                 response.Response = true;
             }
             catch (Exception ex)
             {
-                response.Errors.Add(new Errors { ErrorCode = "201", ErrorMessage = ex.Message });
+                response.Errors.Add(new Errors
+                {
+                    ErrorCode = "201",
+                    ErrorMessage = ex.Message
+                });
             }
 
             return response;
         }
+
 
         public async Task<Result<bool>> DeleteCustomer(int id, string deletedBy)
         {

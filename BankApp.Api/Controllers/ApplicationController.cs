@@ -72,7 +72,16 @@ namespace BankApp.Api.Controllers
             return Ok(result);
         }
 
-     //   [Authorize(Roles = "Admin,Manager")]
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateApplication(int id, [FromBody] ApplicationDto application)
+        {
+            var userId = User.FindFirst("UserId")?.Value;
+            var result = await _applicationRepository.UpdateApplication(id, application, userId);
+            return Ok(result);
+        }
+
+
+        //   [Authorize(Roles = "Admin,Manager")]
         [HttpPost("approve/{id}")]
         public async Task<IActionResult> ApproveApplication(int id)
         {

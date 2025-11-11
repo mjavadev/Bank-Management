@@ -40,11 +40,11 @@ namespace BankApp.Api.Controllers
             return Ok(result);
         }
 
-        [HttpPut]
-        public async Task<IActionResult> UpdateCustomer([FromBody] CustomerDto customer)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateCustomer(int id, [FromBody] CustomerDto customer)
         {
             var userId = User.FindFirst("UserId")?.Value;
-            var result = await _customerRepository.UpdateCustomer(customer, userId);
+            var result = await _customerRepository.UpdateCustomer(id,customer, userId);
             return Ok(result);
         }
 

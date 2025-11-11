@@ -13,6 +13,7 @@ namespace BankApp.Services.Repositories.Interfaces
         Task<Result<List<ApplicationDto>>> GetPendingApplications();
         Task<Result<ApplicationDto>> GetApplicationById(int id);
         Task<Result<ApplicationDto>> CreateApplication(ApplicationDto application);
+        Task<Result<bool>> UpdateApplication(int id, ApplicationDto applicationDto, string modifiedBy);
         Task<Result<UserResponse>> ApproveApplication(int applicationId, string approvedBy);
         Task<Result<bool>> RejectApplication(int applicationId, string rejectedBy, string reason);
     }

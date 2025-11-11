@@ -573,6 +573,149 @@ namespace BankApp.Services.Repositories.Implementations
         //}
         //updated to fix duplication of customer ids:
 
+        public async Task<Result<bool>> UpdateApplication(int id, ApplicationDto applicationDto, string modifiedBy)
+        {
+            Result<bool> response = new();
+
+            try
+            {
+                // Validate that ID in route matches ID in DTO
+                if (id != applicationDto.ApplicationID)
+                {
+                    response.Errors.Add(new Errors
+                    {
+                        ErrorCode = "416",
+                        ErrorMessage = "Application ID mismatch"
+                    });
+                    return response;
+                }
+
+                // Find the application
+                var application = await _context.CustomerApplications.FindAsync(id);
+
+                if (application == null || application.IsDeleted)
+                {
+                    response.Errors.Add(new Errors
+                    {
+                        ErrorCode = "402",
+                        ErrorMessage = "Application not found"
+                    });
+                    return response;
+                }
+
+                // Only allow updates for Pending applications
+                if (application.Status != ApplicationStatus.Pending)
+                {
+                    response.Errors.Add(new Errors
+                    {
+                        ErrorCode = "417",
+                        ErrorMessage = "Only pending applications can be updated"
+                    });
+                    return response;
+                }
+
+                // Validate uniqueness of Mobile, Aadhar, PAN (excluding current application)
+                var mobileExists = await _context.Customers
+                    .AnyAsync(c => c.MobileNumber == applicationDto.MobileNumber && !c.IsDeleted);
+
+                if (!mobileExists)
+                {
+                    mobileExists = await _context.CustomerApplications
+                        .AnyAsync(a => a.MobileNumber == applicationDto.MobileNumber
+                                    && a.ApplicationID != id
+                                    && a.Status == ApplicationStatus.Pending
+                                    && !a.IsDeleted);
+                }
+
+                if (mobileExists)
+                {
+                    response.Errors.Add(new Errors
+                    {
+                        ErrorCode = "418",
+                        ErrorMessage = "Mobile number already registered"
+                    });
+                    return response;
+                }
+
+                var aadharExists = await _context.Customers
+                    .AnyAsync(c => c.AadharNumber == applicationDto.AadharNumber && !c.IsDeleted);
+
+                if (!aadharExists)
+                {
+                    aadharExists = await _context.CustomerApplications
+                        .AnyAsync(a => a.AadharNumber == applicationDto.AadharNumber
+                                    && a.ApplicationID != id
+                                    && a.Status == ApplicationStatus.Pending
+                                    && !a.IsDeleted);
+                }
+
+                if (aadharExists)
+                {
+                    response.Errors.Add(new Errors
+                    {
+                        ErrorCode = "419",
+                        ErrorMessage = "Aadhar number already registered"
+                    });
+                    return response;
+                }
+
+                var panExists = await _context.Customers
+                    .AnyAsync(c => c.PAN == applicationDto.PAN && !c.IsDeleted);
+
+                if (!panExists)
+                {
+                    panExists = await _context.CustomerApplications
+                        .AnyAsync(a => a.PAN == applicationDto.PAN
+                                    && a.ApplicationID != id
+                                    && a.Status == ApplicationStatus.Pending
+                                    && !a.IsDeleted);
+                }
+
+                if (panExists)
+                {
+                    response.Errors.Add(new Errors
+                    {
+                        ErrorCode = "420",
+                        ErrorMessage = "PAN already registered"
+                    });
+                    return response;
+                }
+
+                // Update application fields
+                application.FullName = applicationDto.FullName;
+                application.DateOfBirth = applicationDto.DateOfBirth;
+                application.Gender = applicationDto.Gender;
+                application.Occupation = applicationDto.Occupation;
+                application.MobileNumber = applicationDto.MobileNumber;
+                application.AadharNumber = applicationDto.AadharNumber;
+                application.PAN = applicationDto.PAN;
+                application.AccountTypeID = applicationDto.AccountTypeID;
+
+                // Update image URL only if provided
+                if (!string.IsNullOrEmpty(applicationDto.CustomerImageURL))
+                {
+                    application.CustomerImageURL = applicationDto.CustomerImageURL;
+                }
+
+                application.ModifiedBy = modifiedBy;
+                application.ModifiedDate = DateTime.Now;
+
+                await _context.SaveChangesAsync();
+                response.Response = true;
+            }
+            catch (Exception ex)
+            {
+                response.Errors.Add(new Errors
+                {
+                    ErrorCode = "401",
+                    ErrorMessage = ex.Message
+                });
+            }
+
+            return response;
+        }
+
+
         public async Task<Result<UserResponse>> ApproveApplication(int applicationId, string approvedBy)
 
         {
