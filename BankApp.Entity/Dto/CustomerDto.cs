@@ -24,5 +24,6 @@ namespace BankApp.Entity.Dto
         public string? CustomerImageURL { get; set; }
         public bool IsActive { get; set; } = true;
 
+        public List<AccountDto> Accounts { get; set; } = new();
     }
 }

@@ -23,45 +23,153 @@ namespace BankApp.Services.Repositories.Implementations
             _userManager = userManager;
         }
 
+        /* public async Task<Result<List<CustomerDto>>> GetAllCustomers()
+         {
+             Result<List<CustomerDto>> response = new();
+
+             try
+             {
+                 var customers = await _context.Customers
+                     .Where(c => !c.IsDeleted)
+                     .Include(c => c.ApplicationUser)
+                     .Include(c => c.ApprovedByUser)
+                     .Select(c => new CustomerDto
+                     {
+                         CustomerID = c.CustomerID,
+                         ApplicationUserID = c.ApplicationUserID,
+                         UserName = c.ApplicationUser.UserName,
+                         FullName = c.ApplicationUser.FullName,
+                         DateOfBirth = c.DateOfBirth,
+                         Gender = c.Gender,
+                         Occupation = c.Occupation,
+                         MobileNumber = c.MobileNumber,
+                         ApprovedByUserID = c.ApprovedByUserID,
+                         ApprovedByName = c.ApprovedByUser != null ? c.ApprovedByUser.FullName : null,
+                         ApprovalDate = c.ApprovalDate,
+                         AadharNumber = c.AadharNumber,
+                         PAN = c.PAN,
+                         CustomerImageURL = c.CustomerImageURL,
+                         IsActive = c.IsActive
+                     })
+                     .ToListAsync();
+
+                 response.Response = customers;
+             }
+             catch (Exception ex)
+             {
+                 response.Errors.Add(new Errors { ErrorCode = "201", ErrorMessage = ex.Message });
+             }
+
+             return response;
+         }*/
         public async Task<Result<List<CustomerDto>>> GetAllCustomers()
         {
             Result<List<CustomerDto>> response = new();
 
             try
             {
+                // Step 1: Load entities with all related data
                 var customers = await _context.Customers
                     .Where(c => !c.IsDeleted)
                     .Include(c => c.ApplicationUser)
                     .Include(c => c.ApprovedByUser)
-                    .Select(c => new CustomerDto
-                    {
-                        CustomerID = c.CustomerID,
-                        ApplicationUserID = c.ApplicationUserID,
-                        UserName = c.ApplicationUser.UserName,
-                        FullName = c.ApplicationUser.FullName,
-                        DateOfBirth = c.DateOfBirth,
-                        Gender = c.Gender,
-                        Occupation = c.Occupation,
-                        MobileNumber = c.MobileNumber,
-                        ApprovedByUserID = c.ApprovedByUserID,
-                        ApprovedByName = c.ApprovedByUser != null ? c.ApprovedByUser.FullName : null,
-                        ApprovalDate = c.ApprovalDate,
-                        AadharNumber = c.AadharNumber,
-                        PAN = c.PAN,
-                        CustomerImageURL = c.CustomerImageURL,
-                        IsActive = c.IsActive
-                    })
+                    .Include(c => c.Accounts)  // ← Include accounts
+                        .ThenInclude(a => a.AccountType)  // ← Include account type
                     .ToListAsync();
 
-                response.Response = customers;
+                // Step 2: Map to DTO list after fetching
+                var customerDtos = customers.Select(c => new CustomerDto
+                {
+                    CustomerID = c.CustomerID,
+                    ApplicationUserID = c.ApplicationUserID,
+                    UserName = c.ApplicationUser.UserName,
+                    FullName = c.ApplicationUser.FullName,
+                    DateOfBirth = c.DateOfBirth,
+                    Gender = c.Gender,
+                    Occupation = c.Occupation,
+                    MobileNumber = c.MobileNumber,
+                    ApprovedByUserID = c.ApprovedByUserID,
+                    ApprovedByName = c.ApprovedByUser != null ? c.ApprovedByUser.FullName : null,
+                    ApprovalDate = c.ApprovalDate,
+                    AadharNumber = c.AadharNumber,
+                    PAN = c.PAN,
+                    CustomerImageURL = c.CustomerImageURL,
+                    IsActive = c.IsActive,
+                    Accounts = c.Accounts
+                        .Where(a => !a.IsDeleted)  // Only non-deleted accounts
+                        .Select(a => new AccountDto
+                        {
+                            AccountID = a.AccountID,
+                            AccountNumber = a.AccountNumber,
+                            AccountTypeName = a.AccountType.TypeName,
+                            Balance = a.Balance,
+                            OpenDate = a.OpenDate,
+                            Status = a.Status,
+                            IsActive = a.IsActive
+                        }).ToList()
+                }).ToList();
+
+                response.Response = customerDtos;
             }
             catch (Exception ex)
             {
-                response.Errors.Add(new Errors { ErrorCode = "201", ErrorMessage = ex.Message });
+                response.Errors.Add(new Errors
+                {
+                    ErrorCode = "201",
+                    ErrorMessage = ex.Message
+                });
             }
 
             return response;
         }
+
+
+        /* public async Task<Result<CustomerDto>> GetCustomerById(int id)
+         {
+             Result<CustomerDto> response = new();
+
+             try
+             {
+                 var customer = await _context.Customers
+                     .Where(c => c.CustomerID == id && !c.IsDeleted)
+                     .Include(c => c.ApplicationUser)
+                     .Include(c => c.ApprovedByUser)
+                     .Select(c => new CustomerDto
+                     {
+                         CustomerID = c.CustomerID,
+                         ApplicationUserID = c.ApplicationUserID,
+                         UserName = c.ApplicationUser.UserName,
+                         FullName = c.ApplicationUser.FullName,
+                         DateOfBirth = c.DateOfBirth,
+                         Gender = c.Gender,
+                         Occupation = c.Occupation,
+                         MobileNumber = c.MobileNumber,
+                         ApprovedByUserID = c.ApprovedByUserID,
+                         ApprovedByName = c.ApprovedByUser != null ? c.ApprovedByUser.FullName : null,
+                         ApprovalDate = c.ApprovalDate,
+                         AadharNumber = c.AadharNumber,
+                         PAN = c.PAN,
+                         CustomerImageURL = c.CustomerImageURL,
+                         IsActive = c.IsActive,
+                     })
+                     .FirstOrDefaultAsync();
+
+                 if (customer == null)
+                 {
+                     response.Errors.Add(new Errors { ErrorCode = "202", ErrorMessage = "Customer not found" });
+                 }
+                 else
+                 {
+                     response.Response = customer;
+                 }
+             }
+             catch (Exception ex)
+             {
+                 response.Errors.Add(new Errors { ErrorCode = "201", ErrorMessage = ex.Message });
+             }
+
+             return response;
+         }*/
 
         public async Task<Result<CustomerDto>> GetCustomerById(int id)
         {
@@ -73,42 +181,113 @@ namespace BankApp.Services.Repositories.Implementations
                     .Where(c => c.CustomerID == id && !c.IsDeleted)
                     .Include(c => c.ApplicationUser)
                     .Include(c => c.ApprovedByUser)
-                    .Select(c => new CustomerDto
-                    {
-                        CustomerID = c.CustomerID,
-                        ApplicationUserID = c.ApplicationUserID,
-                        UserName = c.ApplicationUser.UserName,
-                        FullName = c.ApplicationUser.FullName,
-                        DateOfBirth = c.DateOfBirth,
-                        Gender = c.Gender,
-                        Occupation = c.Occupation,
-                        MobileNumber = c.MobileNumber,
-                        ApprovedByUserID = c.ApprovedByUserID,
-                        ApprovedByName = c.ApprovedByUser != null ? c.ApprovedByUser.FullName : null,
-                        ApprovalDate = c.ApprovalDate,
-                        AadharNumber = c.AadharNumber,
-                        PAN = c.PAN,
-                        CustomerImageURL = c.CustomerImageURL,
-                        IsActive = c.IsActive
-                    })
+                    .Include(c => c.Accounts)  // ← Include accounts
+                        .ThenInclude(a => a.AccountType)  // ← Include account type
                     .FirstOrDefaultAsync();
 
                 if (customer == null)
                 {
-                    response.Errors.Add(new Errors { ErrorCode = "202", ErrorMessage = "Customer not found" });
+                    response.Errors.Add(new Errors
+                    {
+                        ErrorCode = "202",
+                        ErrorMessage = "Customer not found"
+                    });
+                    return response;
                 }
-                else
+
+                // Map to DTO after fetching
+                var customerDto = new CustomerDto
                 {
-                    response.Response = customer;
-                }
+                    CustomerID = customer.CustomerID,
+                    ApplicationUserID = customer.ApplicationUserID,
+                    UserName = customer.ApplicationUser.UserName,
+                    FullName = customer.ApplicationUser.FullName,
+                    DateOfBirth = customer.DateOfBirth,
+                    Gender = customer.Gender,
+                    Occupation = customer.Occupation,
+                    MobileNumber = customer.MobileNumber,
+                    ApprovedByUserID = customer.ApprovedByUserID,
+                    ApprovedByName = customer.ApprovedByUser != null ? customer.ApprovedByUser.FullName : null,
+                    ApprovalDate = customer.ApprovalDate,
+                    AadharNumber = customer.AadharNumber,
+                    PAN = customer.PAN,
+                    CustomerImageURL = customer.CustomerImageURL,
+                    IsActive = customer.IsActive,
+                    Accounts = customer.Accounts
+                        .Where(a => !a.IsDeleted)  // only include non-deleted accounts
+                        .Select(a => new AccountDto
+                        {
+                            AccountID = a.AccountID,
+                            AccountNumber = a.AccountNumber,
+                            AccountTypeName = a.AccountType.TypeName,
+                            Balance = a.Balance,
+                            OpenDate = a.OpenDate,
+                            Status = a.Status,
+                            IsActive = a.IsActive
+                        }).ToList()
+                };
+
+                response.Response = customerDto;
             }
             catch (Exception ex)
             {
-                response.Errors.Add(new Errors { ErrorCode = "201", ErrorMessage = ex.Message });
+                response.Errors.Add(new Errors
+                {
+                    ErrorCode = "201",
+                    ErrorMessage = ex.Message
+                });
             }
 
             return response;
         }
+
+
+        /* public async Task<Result<CustomerDto>> GetCustomerByUserId(string userId)
+         {
+             Result<CustomerDto> response = new();
+
+             try
+             {
+                 var customer = await _context.Customers
+                     .Where(c => c.ApplicationUserID == userId && !c.IsDeleted)
+                     .Include(c => c.ApplicationUser)
+                     .Include(c => c.ApprovedByUser)
+                     .Select(c => new CustomerDto
+                     {
+                         CustomerID = c.CustomerID,
+                         ApplicationUserID = c.ApplicationUserID,
+                         UserName = c.ApplicationUser.UserName,
+                         FullName = c.ApplicationUser.FullName,
+                         DateOfBirth = c.DateOfBirth,
+                         Gender = c.Gender,
+                         Occupation = c.Occupation,
+                         MobileNumber = c.MobileNumber,
+                         ApprovedByUserID = c.ApprovedByUserID,
+                         ApprovedByName = c.ApprovedByUser != null ? c.ApprovedByUser.FullName : null,
+                         ApprovalDate = c.ApprovalDate,
+                         AadharNumber = c.AadharNumber,
+                         PAN = c.PAN,
+                         CustomerImageURL = c.CustomerImageURL,
+                         IsActive = c.IsActive
+                     })
+                     .FirstOrDefaultAsync();
+
+                 if (customer == null)
+                 {
+                     response.Errors.Add(new Errors { ErrorCode = "202", ErrorMessage = "Customer not found" });
+                 }
+                 else
+                 {
+                     response.Response = customer;
+                 }
+             }
+             catch (Exception ex)
+             {
+                 response.Errors.Add(new Errors { ErrorCode = "201", ErrorMessage = ex.Message });
+             }
+
+             return response;
+         }*/
 
         public async Task<Result<CustomerDto>> GetCustomerByUserId(string userId)
         {
@@ -116,46 +295,71 @@ namespace BankApp.Services.Repositories.Implementations
 
             try
             {
+                // Step 1: Load entity with all related data
                 var customer = await _context.Customers
                     .Where(c => c.ApplicationUserID == userId && !c.IsDeleted)
                     .Include(c => c.ApplicationUser)
                     .Include(c => c.ApprovedByUser)
-                    .Select(c => new CustomerDto
-                    {
-                        CustomerID = c.CustomerID,
-                        ApplicationUserID = c.ApplicationUserID,
-                        UserName = c.ApplicationUser.UserName,
-                        FullName = c.ApplicationUser.FullName,
-                        DateOfBirth = c.DateOfBirth,
-                        Gender = c.Gender,
-                        Occupation = c.Occupation,
-                        MobileNumber = c.MobileNumber,
-                        ApprovedByUserID = c.ApprovedByUserID,
-                        ApprovedByName = c.ApprovedByUser != null ? c.ApprovedByUser.FullName : null,
-                        ApprovalDate = c.ApprovalDate,
-                        AadharNumber = c.AadharNumber,
-                        PAN = c.PAN,
-                        CustomerImageURL = c.CustomerImageURL,
-                        IsActive = c.IsActive
-                    })
+                    .Include(c => c.Accounts)  // ← Include accounts
+                        .ThenInclude(a => a.AccountType)  // ← Include account type
                     .FirstOrDefaultAsync();
 
                 if (customer == null)
                 {
-                    response.Errors.Add(new Errors { ErrorCode = "202", ErrorMessage = "Customer not found" });
+                    response.Errors.Add(new Errors
+                    {
+                        ErrorCode = "202",
+                        ErrorMessage = "Customer not found"
+                    });
+                    return response;
                 }
-                else
+
+                // Step 2: Map to DTO after fetching
+                var customerDto = new CustomerDto
                 {
-                    response.Response = customer;
-                }
+                    CustomerID = customer.CustomerID,
+                    ApplicationUserID = customer.ApplicationUserID,
+                    UserName = customer.ApplicationUser.UserName,
+                    FullName = customer.ApplicationUser.FullName,
+                    DateOfBirth = customer.DateOfBirth,
+                    Gender = customer.Gender,
+                    Occupation = customer.Occupation,
+                    MobileNumber = customer.MobileNumber,
+                    ApprovedByUserID = customer.ApprovedByUserID,
+                    ApprovedByName = customer.ApprovedByUser != null ? customer.ApprovedByUser.FullName : null,
+                    ApprovalDate = customer.ApprovalDate,
+                    AadharNumber = customer.AadharNumber,
+                    PAN = customer.PAN,
+                    CustomerImageURL = customer.CustomerImageURL,
+                    IsActive = customer.IsActive,
+                    Accounts = customer.Accounts
+                        .Where(a => !a.IsDeleted)  // Only non-deleted accounts
+                        .Select(a => new AccountDto
+                        {
+                            AccountID = a.AccountID,
+                            AccountNumber = a.AccountNumber,
+                            AccountTypeName = a.AccountType.TypeName,
+                            Balance = a.Balance,
+                            OpenDate = a.OpenDate,
+                            Status = a.Status,
+                            IsActive = a.IsActive
+                        }).ToList()
+                };
+
+                response.Response = customerDto;
             }
             catch (Exception ex)
             {
-                response.Errors.Add(new Errors { ErrorCode = "201", ErrorMessage = ex.Message });
+                response.Errors.Add(new Errors
+                {
+                    ErrorCode = "201",
+                    ErrorMessage = ex.Message
+                });
             }
 
             return response;
         }
+
 
         /* public async Task<Result<bool>> UpdateCustomer(CustomerDto customerDto, string modifiedBy)
          {
