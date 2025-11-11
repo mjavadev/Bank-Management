@@ -42,6 +42,7 @@ namespace BankApp.Services.Repositories.Implementations
                         DateOfBirth = c.DateOfBirth,
                         Gender = c.Gender,
                         Occupation = c.Occupation,
+                        MobileNumber = c.MobileNumber,
                         ApprovedByUserID = c.ApprovedByUserID,
                         ApprovedByName = c.ApprovedByUser != null ? c.ApprovedByUser.FullName : null,
                         ApprovalDate = c.ApprovalDate,
@@ -81,6 +82,7 @@ namespace BankApp.Services.Repositories.Implementations
                         DateOfBirth = c.DateOfBirth,
                         Gender = c.Gender,
                         Occupation = c.Occupation,
+                        MobileNumber = c.MobileNumber,
                         ApprovedByUserID = c.ApprovedByUserID,
                         ApprovedByName = c.ApprovedByUser != null ? c.ApprovedByUser.FullName : null,
                         ApprovalDate = c.ApprovalDate,
@@ -127,6 +129,7 @@ namespace BankApp.Services.Repositories.Implementations
                         DateOfBirth = c.DateOfBirth,
                         Gender = c.Gender,
                         Occupation = c.Occupation,
+                        MobileNumber = c.MobileNumber,
                         ApprovedByUserID = c.ApprovedByUserID,
                         ApprovedByName = c.ApprovedByUser != null ? c.ApprovedByUser.FullName : null,
                         ApprovalDate = c.ApprovalDate,
@@ -170,6 +173,7 @@ namespace BankApp.Services.Repositories.Implementations
                 customer.DateOfBirth = customerDto.DateOfBirth;
                 customer.Gender = customerDto.Gender;
                 customer.Occupation = customerDto.Occupation;
+                customer.MobileNumber = customerDto.MobileNumber;
                 customer.AadharNumber = customerDto.AadharNumber;
                 customer.PAN = customerDto.PAN;
                 customer.ModifiedBy = modifiedBy;

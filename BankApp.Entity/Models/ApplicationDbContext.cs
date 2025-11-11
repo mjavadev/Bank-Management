@@ -147,9 +147,9 @@ namespace WebApp.BankingApi.Entity.Models
                 .OnDelete(DeleteBehavior.Restrict);
 
             builder.Entity<Customer>()
-        .HasIndex(c => c.MobileNumber)
-        .IsUnique()
-        .HasFilter("[IsDeleted]=0");
+                .HasIndex(c => c.MobileNumber)
+                .IsUnique()
+                .HasFilter("[IsDeleted]=0");
             builder.Entity<Customer>()
                 .HasIndex(c => c.AadharNumber)
                 .IsUnique()
