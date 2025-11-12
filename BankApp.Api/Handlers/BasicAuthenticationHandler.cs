@@ -39,16 +39,37 @@ namespace BankApp.Api.Handlers
                 var username = credentials[0];
                 var password = credentials[1];
 
-                var isValid = await _userRepository.IsAValidUser(username, password);
+                // ⭐ Get full user details instead of just validation
+                var userResult = await _userRepository.Authenticate(new Entity.Dto.UserRequest
+                {
+                    UserName = username,
+                    Password = password
+                });
 
-                if (!isValid)
+                if (userResult.IsError || userResult.Response == null)
                 {
                     return AuthenticateResult.Fail("Invalid Username or Password");
                 }
 
-                var claims = new[] {
-                    new Claim(ClaimTypes.Name, username)
-                };
+                var user = userResult.Response;
+
+                // ⭐ Add ALL necessary claims including UserId
+                var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.Name, user.UserName),
+            new Claim(ClaimTypes.NameIdentifier, user.Id),
+            new Claim("UserId", user.Id), // ⭐ THIS IS THE MISSING CLAIM!
+            new Claim("FullName", user.FullName)
+        };
+
+                // ⭐ Add roles
+                if (user.Roles != null && user.Roles.Any())
+                {
+                    foreach (var role in user.Roles)
+                    {
+                        claims.Add(new Claim(ClaimTypes.Role, role));
+                    }
+                }
 
                 var identity = new ClaimsIdentity(claims, Scheme.Name);
                 var principal = new ClaimsPrincipal(identity);
@@ -56,11 +77,12 @@ namespace BankApp.Api.Handlers
 
                 return AuthenticateResult.Success(ticket);
             }
-            catch
+            catch (Exception ex)
             {
-                return AuthenticateResult.Fail("Invalid Authorization Header");
+                return AuthenticateResult.Fail($"Invalid Authorization Header: {ex.Message}");
             }
         }
+
     }
 
 }
