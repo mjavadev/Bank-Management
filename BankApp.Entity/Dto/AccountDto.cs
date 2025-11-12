@@ -10,7 +10,7 @@ namespace BankApp.Entity.Dto
     public class AccountDto
     {
         public int AccountID { get; set; }
-        public string AccountNumber { get; set; }
+        public string? AccountNumber { get; set; }
         public int CustomerID { get; set; }
         public string? CustomerName { get; set; }
 
@@ -20,7 +20,7 @@ namespace BankApp.Entity.Dto
         public string? AccountTypeName { get; set; }
         public decimal Balance { get; set; }
         public DateTime OpenDate { get; set; }
-        public string Status { get; set; }
+        public string? Status { get; set; }
         public bool IsActive { get; set; }
     }
 }

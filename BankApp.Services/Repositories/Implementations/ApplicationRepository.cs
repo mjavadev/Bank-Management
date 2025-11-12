@@ -27,7 +27,7 @@ namespace BankApp.Services.Repositories.Implementations
             try
             {
                 var applications = await _context.CustomerApplications
-                    .Where(a => !a.IsDeleted)
+                    //.Where(a => !a.IsDeleted)
                     .Select(a => new ApplicationDto
                     {
                         ApplicationID = a.ApplicationID,

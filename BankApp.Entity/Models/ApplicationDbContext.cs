@@ -111,7 +111,7 @@ namespace WebApp.BankingApi.Entity.Models
 
             builder.Entity<Customer>().HasQueryFilter(e => !e.IsDeleted);
             builder.Entity<Employee>().HasQueryFilter(e => !e.IsDeleted);
-            builder.Entity<CustomerApplication>().HasQueryFilter(e => !e.IsDeleted);
+          //  builder.Entity<CustomerApplication>().HasQueryFilter(e => !e.IsDeleted);
             builder.Entity<Account>().HasQueryFilter(e => !e.IsDeleted);
             builder.Entity<Transaction>().HasQueryFilter(e => !e.IsDeleted);
             builder.Entity<ApplicationUser>().HasQueryFilter(e => !e.IsDeleted);

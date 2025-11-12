@@ -15,5 +15,6 @@ namespace BankApp.Entity.Dto
         public bool MustChangePassword { get; set; }
 
         public string TemporaryPassword { get; set; }
+        public string Token { get; set; }
     }
 }
