@@ -25,4 +25,8 @@
     <ProjectReference Include="..\BankApp.Services\BankApp.Services.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\CustomerImages\" />
+  </ItemGroup>
+
 </Project>
