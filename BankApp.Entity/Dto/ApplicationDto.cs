@@ -1,4 +1,5 @@
 ﻿using BankApp.Entity.Enums;
+using BankApp.Entity.ValidationAttributes;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -16,7 +17,10 @@ namespace BankApp.Entity.Dto
         [MaxLength(100)]
         public string FullName { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Date of birth is required")]
+        [DataType(DataType.Date)]
+        [DateNotInFutureAttribute(ErrorMessage = "Date of birth cannot be in the future")]
+        [MinimumAgeAttribute(10, ErrorMessage = "Applicant must be at least 10 years old")]
         public DateTime DateOfBirth { get; set; }
 
         [Required]

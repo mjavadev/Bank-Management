@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BankApp.Api.Controllers
 {
-   // [Authorize]
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class CustomerController : ControllerBase
@@ -18,7 +18,7 @@ namespace BankApp.Api.Controllers
             _customerRepository = customerRepository;
         }
 
-     //   [Authorize(Roles = "Admin,Manager")]
+        [Authorize(Roles = "Admin,Manager")]
         [HttpGet]
         public async Task<IActionResult> GetAllCustomers()
         {
@@ -48,7 +48,7 @@ namespace BankApp.Api.Controllers
             return Ok(result);
         }
 
-    //    [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCustomer(int id)
         {
