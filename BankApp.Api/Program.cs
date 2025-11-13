@@ -96,6 +96,8 @@ builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 
 builder.Services.AddScoped<IApplicationRepository, ApplicationRepository>();
 
+builder.Services.AddScoped<IAccountTypeRepository, AccountTypeRepository>();
+
 builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
 
 builder.Services.AddScoped<IBankAccountRepository, BankAccountRepository>();
