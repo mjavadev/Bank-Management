@@ -13,6 +13,7 @@ namespace BankApp.Services.Repositories.Interfaces
         Task<Result<AccountDto>> GetAccountById(int id);
         Task<Result<AccountDto>> CreateAccount(AccountDto accountDto, string createdBy);
         Task<Result<bool>> DeactivateAccount(int id, string deletedBy);
+        Task<Result<bool>> ToggleAccountStatus(int accountId, string modifiedBy);
 
     }
 

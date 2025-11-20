@@ -49,6 +49,16 @@ namespace BankApp.Api.Controllers
             var result = await _accountRepository.DeactivateAccount(id, userId);
             return Ok(result);
         }
+
+        // Toggle account status (Active/Inactive)
+        [HttpPut("toggle-status/{id}")]
+        public async Task<IActionResult> ToggleAccountStatus(int id)
+        {
+            var userId = User.FindFirst("UserId")?.Value;
+            var result = await _accountRepository.ToggleAccountStatus(id, userId);
+            return Ok(result);
+        }
+
     }
 
 }

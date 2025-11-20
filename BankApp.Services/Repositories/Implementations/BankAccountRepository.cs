@@ -203,6 +203,39 @@ namespace BankApp.Services.Repositories.Implementations
 
             return response;
         }
+
+        public async Task<Result<bool>> ToggleAccountStatus(int accountId, string modifiedBy)
+        {
+            Result<bool> response = new();
+
+            try
+            {
+                var account = await _context.Accounts
+                    .FirstOrDefaultAsync(a => a.AccountID == accountId && !a.IsDeleted);
+
+                if (account == null)
+                {
+                    response.Errors.Add(new Errors { ErrorCode = "602", ErrorMessage = "Account not found" });
+                    return response;
+                }
+
+                // Toggle the status
+                account.IsActive = !account.IsActive;
+                account.Status = account.IsActive ? "Active" : "Inactive";
+                account.ModifiedBy = modifiedBy;
+                account.ModifiedDate = DateTime.Now;
+
+                await _context.SaveChangesAsync();
+                response.Response = true;
+            }
+            catch (Exception ex)
+            {
+                response.Errors.Add(new Errors { ErrorCode = "601", ErrorMessage = ex.Message });
+            }
+
+            return response;
+        }
+
     }
 
 }
