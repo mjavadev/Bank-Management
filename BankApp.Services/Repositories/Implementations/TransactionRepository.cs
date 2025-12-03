@@ -207,8 +207,6 @@ namespace BankApp.Services.Repositories.Implementations
 
                 }
 
-                // VALIDATION: Check if account is active
-
                 if (!account.IsActive)
 
                 {
@@ -218,8 +216,6 @@ namespace BankApp.Services.Repositories.Implementations
                     return response;
 
                 }
-
-                // VALIDATION: Check if customer is active
 
                 if (!account.Customer.IsActive)
 
@@ -249,22 +245,14 @@ namespace BankApp.Services.Repositories.Implementations
 
                 }
 
-                // ⭐ UPDATED: Handle Transfer - lookup recipient by AccountNumber if ID is not provided
-
                 int? recipientAccountId = null;
 
                 if (transactionDto.TransactionType == TransactionType.Transfer)
 
                 {
 
-                    // Check if RecipientAccountNumber is provided (from frontend)
-
                     if (!string.IsNullOrWhiteSpace(transactionDto.RecipientAccountNumber))
-
                     {
-
-                        // Lookup recipient account by account number
-
                         var recipientAccount = await _context.Accounts
 
                             .Include(a => a.Customer)
@@ -301,8 +289,6 @@ namespace BankApp.Services.Repositories.Implementations
 
                         }
 
-                        // Prevent transfer to same account
-
                         if (recipientAccount.AccountID == transactionDto.AccountID)
 
                         {
@@ -315,11 +301,9 @@ namespace BankApp.Services.Repositories.Implementations
 
                         recipientAccountId = recipientAccount.AccountID;
 
-                        transactionDto.RecipientAccountID = recipientAccountId; // Set the ID for response
+                        transactionDto.RecipientAccountID = recipientAccountId;
 
                     }
-
-                    // Check if RecipientAccountID is provided (backward compatibility)
 
                     else if (transactionDto.RecipientAccountID.HasValue)
 
@@ -370,9 +354,6 @@ namespace BankApp.Services.Repositories.Implementations
                     else
 
                     {
-
-                        // Neither ID nor Number provided
-
                         response.Errors.Add(new Errors { ErrorCode = "505", ErrorMessage = "Recipient account required for transfer" });
 
                         return response;
@@ -393,7 +374,7 @@ namespace BankApp.Services.Repositories.Implementations
 
                     Description = transactionDto.Description,
 
-                    RecipientAccountID = recipientAccountId, // ⭐ Use the looked-up ID
+                    RecipientAccountID = recipientAccountId,
 
                     Status = TransactionStatus.Pending,
 
@@ -457,7 +438,6 @@ namespace BankApp.Services.Repositories.Implementations
                     return response;
                 }
 
-                // VALIDATION: Check account is still active
                 if (!transaction.Account.IsActive || !transaction.Account.Customer.IsActive)
                 {
                     response.Errors.Add(new Errors { ErrorCode = "512", ErrorMessage = "Source account or customer is inactive" });
@@ -486,7 +466,6 @@ namespace BankApp.Services.Repositories.Implementations
                             return response;
                         }
 
-                        // VALIDATION: Check recipient is still active
                         if (!transaction.RecipientAccount.IsActive || !transaction.RecipientAccount.Customer.IsActive)
                         {
                             response.Errors.Add(new Errors { ErrorCode = "513", ErrorMessage = "Recipient account or customer is inactive" });

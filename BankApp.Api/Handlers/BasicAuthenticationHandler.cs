@@ -39,7 +39,6 @@ namespace BankApp.Api.Handlers
                 var username = credentials[0];
                 var password = credentials[1];
 
-                // ⭐ Get full user details instead of just validation
                 var userResult = await _userRepository.Authenticate(new Entity.Dto.UserRequest
                 {
                     UserName = username,
@@ -53,16 +52,14 @@ namespace BankApp.Api.Handlers
 
                 var user = userResult.Response;
 
-                // ⭐ Add ALL necessary claims including UserId
                 var claims = new List<Claim>
         {
             new Claim(ClaimTypes.Name, user.UserName),
             new Claim(ClaimTypes.NameIdentifier, user.Id),
-            new Claim("UserId", user.Id), // ⭐ THIS IS THE MISSING CLAIM!
+            new Claim("UserId", user.Id),
             new Claim("FullName", user.FullName)
         };
 
-                // ⭐ Add roles
                 if (user.Roles != null && user.Roles.Any())
                 {
                     foreach (var role in user.Roles)

@@ -331,7 +331,7 @@ namespace BankApp.Services.Repositories.Implementations
 
                 // Load customer WITH ApplicationUser navigation property
                 var customer = await _context.Customers
-                    .Include(c => c.ApplicationUser)  // ← Load related user
+                    .Include(c => c.ApplicationUser)
                     .FirstOrDefaultAsync(c => c.CustomerID == id);
 
                 if (customer == null || customer.IsDeleted)

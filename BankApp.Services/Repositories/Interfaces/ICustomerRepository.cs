@@ -12,8 +12,7 @@ namespace BankApp.Services.Repositories.Interfaces
         Task<Result<List<CustomerDto>>> GetAllCustomers();
         Task<Result<CustomerDto>> GetCustomerById(int id);
         Task<Result<CustomerDto>> GetCustomerByUserId(string userId);
-      //  Task<Result<bool>> UpdateCustomer(CustomerDto customer, string modifiedBy);
-       Task<Result<bool>> UpdateCustomer(int id, CustomerDto customer, string modifiedBy);
+        Task<Result<bool>> UpdateCustomer(int id, CustomerDto customer, string modifiedBy);
         Task<Result<bool>> DeleteCustomer(int id, string deletedBy);
         Task<Result<bool>> DeactivateCustomer(int id, string deletedBy);
     }

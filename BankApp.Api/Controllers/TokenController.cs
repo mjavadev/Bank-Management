@@ -79,7 +79,6 @@ namespace BankApp.Api.Controllers
                 var user = authResult.Response;
                 string key = _configuration["Jwt:Key"];
 
-                // Create claims
                 var claims = new List<Claim>
                 {
                     new Claim(ClaimTypes.Name, user.UserName),
@@ -88,7 +87,6 @@ namespace BankApp.Api.Controllers
                     new Claim("FullName", user.FullName)
                 };
 
-                // Add role claims
                 if (user.Roles != null && user.Roles.Any())
                 {
                     foreach (var role in user.Roles)
@@ -97,7 +95,6 @@ namespace BankApp.Api.Controllers
                     }
                 }
 
-                // Generate JWT token
                 var symmKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
                 var signInKey = new SigningCredentials(symmKey, SecurityAlgorithms.HmacSha256);
 
@@ -110,7 +107,6 @@ namespace BankApp.Api.Controllers
 
                 var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
 
-                // Add token to response
                 user.Token = tokenString;
                 response.Response = user;
 

@@ -105,7 +105,6 @@ namespace BankApp.Services.Repositories.Implementations
 
             try
             {
-                // Verify customer exists and is active
                 var customer = await _context.Customers
                     .FirstOrDefaultAsync(c => c.CustomerID == accountDto.CustomerID && !c.IsDeleted);
 
@@ -121,7 +120,6 @@ namespace BankApp.Services.Repositories.Implementations
                     return response;
                 }
 
-                // Check if customer already has this account type
                 var existingAccount = await _context.Accounts
                     .FirstOrDefaultAsync(a => a.CustomerID == accountDto.CustomerID
                                            && a.AccountTypeID == accountDto.AccountTypeID
@@ -133,14 +131,12 @@ namespace BankApp.Services.Repositories.Implementations
                     return response;
                 }
 
-                // Generate Account Number
                 var maxAccountNumber = await _context.Accounts
                     .IgnoreQueryFilters()
                     .MaxAsync(a => (long?)Convert.ToInt64(a.AccountNumber)) ?? 88855999;
 
                 var newAccountNumber = (maxAccountNumber + 1).ToString();
 
-                // Create Account
                 var account = new Account
                 {
                     AccountNumber = newAccountNumber,
@@ -219,7 +215,6 @@ namespace BankApp.Services.Repositories.Implementations
                     return response;
                 }
 
-                // Toggle the status
                 account.IsActive = !account.IsActive;
                 account.Status = account.IsActive ? "Active" : "Inactive";
                 account.ModifiedBy = modifiedBy;

@@ -142,7 +142,6 @@ namespace BankApp.Services.Repositories.Implementations
 
             try
             {
-                // VALIDATION 1: Check if Mobile Number already exists
                 var mobileExists = await _context.Customers
                     .AnyAsync(c => c.MobileNumber == applicationDto.MobileNumber && !c.IsDeleted);
 
@@ -156,7 +155,6 @@ namespace BankApp.Services.Repositories.Implementations
                     return response;
                 }
 
-                // Also check in pending applications
                 var mobilePendingExists = await _context.CustomerApplications
                     .AnyAsync(a => a.MobileNumber == applicationDto.MobileNumber
                                 && a.Status == ApplicationStatus.Pending
@@ -172,7 +170,6 @@ namespace BankApp.Services.Repositories.Implementations
                     return response;
                 }
 
-                // VALIDATION 2: Check if Aadhar Number already exists
                 var aadharExists = await _context.Customers
                     .AnyAsync(c => c.AadharNumber == applicationDto.AadharNumber && !c.IsDeleted);
 
@@ -186,7 +183,6 @@ namespace BankApp.Services.Repositories.Implementations
                     return response;
                 }
 
-                // Also check in pending applications
                 var aadharPendingExists = await _context.CustomerApplications
                     .AnyAsync(a => a.AadharNumber == applicationDto.AadharNumber
                                 && a.Status == ApplicationStatus.Pending
@@ -202,7 +198,6 @@ namespace BankApp.Services.Repositories.Implementations
                     return response;
                 }
 
-                // VALIDATION 3: Check if PAN already exists
                 var panExists = await _context.Customers
                     .AnyAsync(c => c.PAN == applicationDto.PAN && !c.IsDeleted);
 
@@ -216,7 +211,6 @@ namespace BankApp.Services.Repositories.Implementations
                     return response;
                 }
 
-                // Also check in pending applications
                 var panPendingExists = await _context.CustomerApplications
                     .AnyAsync(a => a.PAN == applicationDto.PAN
                                 && a.Status == ApplicationStatus.Pending
@@ -269,7 +263,7 @@ namespace BankApp.Services.Repositories.Implementations
 
             try
             {
-                // Validate that ID in route matches ID in DTO
+
                 if (id != applicationDto.ApplicationID)
                 {
                     response.Errors.Add(new Errors
@@ -280,7 +274,6 @@ namespace BankApp.Services.Repositories.Implementations
                     return response;
                 }
 
-                // Find the application
                 var application = await _context.CustomerApplications.FindAsync(id);
 
                 if (application == null || application.IsDeleted)
@@ -293,7 +286,6 @@ namespace BankApp.Services.Repositories.Implementations
                     return response;
                 }
 
-                // Only allow updates for Pending applications
                 if (application.Status != ApplicationStatus.Pending)
                 {
                     response.Errors.Add(new Errors
@@ -304,7 +296,6 @@ namespace BankApp.Services.Repositories.Implementations
                     return response;
                 }
 
-                // Validate uniqueness of Mobile, Aadhar, PAN (excluding current application)
                 var mobileExists = await _context.Customers
                     .AnyAsync(c => c.MobileNumber == applicationDto.MobileNumber && !c.IsDeleted);
 
@@ -371,7 +362,6 @@ namespace BankApp.Services.Repositories.Implementations
                     return response;
                 }
 
-                // Update application fields
                 application.FullName = applicationDto.FullName;
                 application.DateOfBirth = applicationDto.DateOfBirth;
                 application.Gender = applicationDto.Gender;
@@ -381,7 +371,6 @@ namespace BankApp.Services.Repositories.Implementations
                 application.PAN = applicationDto.PAN;
                 application.AccountTypeID = applicationDto.AccountTypeID;
 
-                // Update image URL only if provided
                 if (!string.IsNullOrEmpty(applicationDto.CustomerImageURL))
                 {
                     application.CustomerImageURL = applicationDto.CustomerImageURL;
@@ -429,7 +418,6 @@ namespace BankApp.Services.Repositories.Implementations
                     return response;
                 }
 
-                // RE-VALIDATE uniqueness before approval (in case duplicate was added while pending)
                 var mobileExists = await _context.Customers
                     .AnyAsync(c => c.MobileNumber == application.MobileNumber && !c.IsDeleted);
 
@@ -651,7 +639,6 @@ namespace BankApp.Services.Repositories.Implementations
                     return response;
                 }
 
-                // Validate rejection reason
                 if (string.IsNullOrWhiteSpace(reason))
                 {
                     response.Errors.Add(new Errors
@@ -662,13 +649,11 @@ namespace BankApp.Services.Repositories.Implementations
                     return response;
                 }
 
-                // Update application status
                 application.Status = ApplicationStatus.Rejected;
                 application.ApprovedByUserID = rejectedBy;
                 application.ApprovalDate = DateTime.Now;
                 application.RejectionReason = reason.Trim();
 
-                // Soft delete the application
                 application.IsDeleted = true;
                 application.DeletedBy = rejectedBy;
                 application.DeletedDate = DateTime.Now;

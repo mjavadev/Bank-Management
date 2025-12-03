@@ -158,7 +158,7 @@ namespace WebApp.BankingApi.Entity.Models
                 .HasIndex(c => c.PAN)
                 .IsUnique()
                 .HasFilter("[IsDeleted]=0");
-            // ---- Indexes for CustomerApplications validation ----
+
             builder.Entity<CustomerApplication>()
                 .HasIndex(a => a.MobileNumber);
             builder.Entity<CustomerApplication>()

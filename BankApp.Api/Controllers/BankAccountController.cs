@@ -16,7 +16,6 @@ namespace BankApp.Api.Controllers
             _accountRepository = accountRepository;
         }
 
-        // Get all accounts for a customer
         [HttpGet("customer/{customerId}")]
         public async Task<IActionResult> GetAccountsByCustomerId(int customerId)
         {
@@ -24,7 +23,6 @@ namespace BankApp.Api.Controllers
             return Ok(result);
         }
 
-        // Get account by ID
         [HttpGet("{id}")]
         public async Task<IActionResult> GetAccountById(int id)
         {
@@ -32,7 +30,6 @@ namespace BankApp.Api.Controllers
             return Ok(result);
         }
 
-        // Create new account for existing customer
         [HttpPost]
         public async Task<IActionResult> CreateAccount([FromBody] AccountDto accountDto)
         {
@@ -41,7 +38,6 @@ namespace BankApp.Api.Controllers
             return Ok(result);
         }
 
-        // Deactivate account (soft delete)
         [HttpDelete("deactivate/{id}")]
         public async Task<IActionResult> DeactivateAccount(int id)
         {
@@ -50,7 +46,6 @@ namespace BankApp.Api.Controllers
             return Ok(result);
         }
 
-        // Toggle account status (Active/Inactive)
         [HttpPut("toggle-status/{id}")]
         public async Task<IActionResult> ToggleAccountStatus(int id)
         {

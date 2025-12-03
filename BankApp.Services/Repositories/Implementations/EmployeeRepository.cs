@@ -152,7 +152,6 @@ namespace BankApp.Services.Repositories.Implementations
 
             try
             {
-                // Validate that ID in route matches ID in DTO (optional but recommended)
                 if (id != employeeDto.EmployeeID)
                 {
                     response.Errors.Add(new Errors
@@ -178,7 +177,6 @@ namespace BankApp.Services.Repositories.Implementations
                 .Include(e => e.ApplicationUser) 
                 .FirstOrDefaultAsync(e => e.EmployeeID == id);
 
-                // Update ApplicationUser.FullName with simple validation
                 if (!string.IsNullOrWhiteSpace(employeeDto.FullName))
                 {
                     var trimmedName = employeeDto.FullName.Trim();

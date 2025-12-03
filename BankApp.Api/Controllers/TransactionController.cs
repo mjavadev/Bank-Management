@@ -38,11 +38,7 @@ namespace BankApp.Api.Controllers
 
         {
 
-            // Get current user's ApplicationUserID from claims
-
             var userId = User.FindFirstValue("UserId") ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            // Lookup the account and its owner
 
             var account = await _context.Accounts
 
@@ -53,8 +49,6 @@ namespace BankApp.Api.Controllers
             if (account == null || account.IsDeleted)
 
                 return NotFound();
-
-            // IDOR Protection: Only allow access if account owner's ApplicationUserID matches current user
 
             if (account.Customer.ApplicationUserID != userId)
 

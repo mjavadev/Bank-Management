@@ -16,24 +16,24 @@ namespace BankApp.Entity.Models
         public int CustomerID { get; set; }
 
         [Required]
-        public string ApplicationUserID { get; set; }
+        public string? ApplicationUserID { get; set; }
 
         [ForeignKey("ApplicationUserID")]
-        public ApplicationUser ApplicationUser { get; set; }
+        public ApplicationUser? ApplicationUser { get; set; }
 
         [Required]
         public DateTime DateOfBirth { get; set; }
 
         [Required]
         [MaxLength(10)]
-        public string Gender { get; set; }
+        public string? Gender { get; set; }
 
         [MaxLength(50)]
         public string? Occupation { get; set; }
 
         [Required]
         [MaxLength(10)]
-        public string MobileNumber { get; set; }
+        public string? MobileNumber { get; set; }
 
         public string? ApprovedByUserID { get; set; }
 
@@ -51,6 +51,6 @@ namespace BankApp.Entity.Models
         public string? CustomerImageURL { get; set; }
 
         public bool IsActive { get; set; } = true;
-        public ICollection<Account> Accounts { get; set; }
+        public ICollection<Account>? Accounts { get; set; }
     }
 }
