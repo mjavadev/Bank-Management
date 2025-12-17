@@ -22,7 +22,7 @@ namespace BankApp.Entity.Models
         public int AccountID { get; set; }
 
         [ForeignKey("AccountID")]
-        public Account Account { get; set; }
+        public Account? Account { get; set; }
 
         [Required]
         public TransactionType TransactionType { get; set; }

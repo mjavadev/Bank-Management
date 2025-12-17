@@ -10,9 +10,9 @@ namespace BankApp.Entity.Dto
     public class UserRequest
     {
         [Required]
-        public string UserName { get; set; }
+        public required string UserName { get; set; }
 
         [Required]
-        public string Password { get; set; }
+        public required string Password { get; set; }
     }
 }

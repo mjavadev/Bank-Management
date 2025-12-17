@@ -16,19 +16,19 @@ namespace BankApp.Entity.Models
 
         [Required]
         [MaxLength(20)]
-        public string AccountNumber { get; set; }
+        public required string AccountNumber { get; set; }
 
         [Required]
         public int CustomerID { get; set; }
 
         [ForeignKey("CustomerID")]
-        public Customer Customer { get; set; }
+        public Customer? Customer { get; set; }
 
         [Required]
         public int AccountTypeID { get; set; }
 
         [ForeignKey("AccountTypeID")]
-        public AccountType AccountType { get; set; }
+        public AccountType? AccountType { get; set; }
 
         [Column(TypeName = "decimal(18,2)")]
         public decimal Balance { get; set; } = 0;
@@ -40,7 +40,7 @@ namespace BankApp.Entity.Models
 
         public bool IsActive { get; set; } = true;
 
-        public ICollection<Transaction> Transactions { get; set; }
+        public ICollection<Transaction>? Transactions { get; set; }
 
     }
 }

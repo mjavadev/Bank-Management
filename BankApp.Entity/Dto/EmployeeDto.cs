@@ -10,21 +10,21 @@ namespace BankApp.Entity.Dto
     public class EmployeeDto
     {
         public int EmployeeID { get; set; }
-        public string ApplicationUserID { get; set; }
+        public string? ApplicationUserID { get; set; }
 
         [Required]
-        public string UserName { get; set; }
+        public required string UserName { get; set; }
 
         [Required]
-        public string FullName { get; set; }
+        public required string FullName { get; set; }
 
         public string? Password { get; set; }
 
         [Required]
-        public string StaffCode { get; set; }
+        public required string StaffCode { get; set; }
 
         [Required]
-        public string JobTitle { get; set; }
+        public required string JobTitle { get; set; }
 
         [Required]
         public DateTime DateHired { get; set; }

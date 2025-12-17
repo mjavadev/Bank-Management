@@ -16,18 +16,18 @@ namespace BankApp.Entity.Models
         public int EmployeeID { get; set; }
 
         [Required]
-        public string ApplicationUserID { get; set; }
+        public required string ApplicationUserID { get; set; }
 
         [ForeignKey("ApplicationUserID")]
-        public ApplicationUser ApplicationUser { get; set; }
+        public ApplicationUser? ApplicationUser { get; set; }
 
         [Required]
         [MaxLength(20)]
-        public string StaffCode { get; set; }
+        public required string StaffCode { get; set; }
 
         [Required]
         [MaxLength(50)]
-        public string JobTitle { get; set; }
+        public required string JobTitle { get; set; }
 
         [Required]
         public DateTime DateHired { get; set; }

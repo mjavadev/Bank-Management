@@ -17,7 +17,7 @@ namespace BankApp.Entity.Models
 
         [Required]
         [MaxLength(50)]
-        public string TypeName { get; set; }
+        public required string TypeName { get; set; }
 
         [MaxLength(200)]
         public string? Description { get; set; }
@@ -26,6 +26,6 @@ namespace BankApp.Entity.Models
 
         public bool IsDeleted { get; set; } = false;
 
-        public ICollection<Account> Accounts { get; set; }
+        public ICollection<Account>? Accounts { get; set; }
     }
 }

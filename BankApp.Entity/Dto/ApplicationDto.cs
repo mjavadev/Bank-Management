@@ -15,17 +15,17 @@ namespace BankApp.Entity.Dto
 
         [Required]
         [MaxLength(100)]
-        public string FullName { get; set; }
+        public string? FullName { get; set; }
 
         [Required(ErrorMessage = "Date of birth is required")]
         [DataType(DataType.Date)]
         [DateNotInFutureAttribute(ErrorMessage = "Date of birth cannot be in the future")]
-        [MinimumAgeAttribute(10, ErrorMessage = "Applicant must be at least 10 years old")]
+        [MinimumAgeAttribute(18, ErrorMessage = "Applicant must be at least 18 years old")]
         public DateTime DateOfBirth { get; set; }
 
         [Required]
         [MaxLength(10)]
-        public string Gender { get; set; }
+        public string? Gender { get; set; }
 
         [MaxLength(50)]
         public string? Occupation { get; set; }
@@ -33,17 +33,17 @@ namespace BankApp.Entity.Dto
         [Required]
         [MaxLength(10)]
         [RegularExpression(@"^[6-9]\d{9}$", ErrorMessage = "Invalid mobile number")]
-        public string MobileNumber { get; set; }
+        public required string MobileNumber { get; set; }
 
         [Required]
         [MaxLength(12)]
         [RegularExpression(@"^\d{12}$", ErrorMessage = "Aadhar must be 12 digits")]
-        public string AadharNumber { get; set; }
+        public required string AadharNumber { get; set; }
 
         [Required]
         [MaxLength(10)]
         [RegularExpression(@"^[A-Z]{5}[0-9]{4}[A-Z]{1}$", ErrorMessage = "Invalid PAN format")]
-        public string PAN { get; set; }
+        public required string PAN { get; set; }
 
         public string? CustomerImageURL { get; set; }
 
