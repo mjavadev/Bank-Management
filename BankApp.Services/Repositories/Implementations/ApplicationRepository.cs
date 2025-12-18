@@ -5,6 +5,7 @@ using BankApp.Entity.Security;
 using BankApp.Services.Repositories.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Cryptography;
 using WebApp.BankingApi.Entity.Models;
 
 namespace BankApp.Services.Repositories.Implementations
@@ -498,8 +499,8 @@ namespace BankApp.Services.Repositories.Implementations
                     CreatedDate = DateTime.Now
                 };
 
-               // var defaultPassword = GenerateRandomPassword();
-               var defaultPassword = "Default@123";
+                var defaultPassword = GenerateStrongPassword();
+               // var defaultPassword = "Default@123";
 
                 var userResult = await _userManager.CreateAsync(user, defaultPassword);
 
@@ -604,13 +605,52 @@ namespace BankApp.Services.Repositories.Implementations
 
 
 
-        private string GenerateRandomPassword()
+        //private string GenerateRandomPassword()
+        //{
+        //    var chars = "ABCDEFGHJKLMNOPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz0123456789!@#$";
+        //    var random = new Random();
+        //    return new string(Enumerable.Repeat(chars, 12)
+        //        .Select(s => s[random.Next(s.Length)]).ToArray());
+        //}
+        private static string GenerateStrongPassword(int length = 12)
         {
-            var chars = "ABCDEFGHJKLMNOPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz0123456789!@#$";
-            var random = new Random();
-            return new string(Enumerable.Repeat(chars, 12)
-                .Select(s => s[random.Next(s.Length)]).ToArray());
+            if (length < 8)
+                throw new ArgumentException("Password length must be at least 8");
+
+            const string upper = "ABCDEFGHJKLMNOPQRSTUVWXYZ";
+            const string lower = "abcdefghijkmnopqrstuvwxyz";
+            const string digits = "0123456789";
+            const string special = "!@#$%^&*()-_=+[]{}<>?";
+
+            var random = RandomNumberGenerator.Create();
+            var passwordChars = new List<char>
+    {
+        GetRandomChar(upper, random),
+        GetRandomChar(lower, random),
+        GetRandomChar(digits, random),
+        GetRandomChar(special, random)
+    };
+
+            string allChars = upper + lower + digits + special;
+
+            while (passwordChars.Count < length)
+            {
+                passwordChars.Add(GetRandomChar(allChars, random));
+            }
+
+            return new string(passwordChars
+                .OrderBy(_ => Guid.NewGuid())
+                .ToArray());
         }
+
+        private static char GetRandomChar(string chars, RandomNumberGenerator rng)
+        {
+            var buffer = new byte[4];
+            rng.GetBytes(buffer);
+            int index = (int)(BitConverter.ToUInt32(buffer, 0) % chars.Length);
+            return chars[index];
+        }
+
 
         public async Task<Result<bool>> RejectApplication(int applicationId, string rejectedBy, string reason)
         {
