@@ -23,61 +23,20 @@ namespace BankApp.Services.Repositories.Implementations
             _userManager = userManager;
         }
 
-        /* public async Task<Result<List<CustomerDto>>> GetAllCustomers()
-         {
-             Result<List<CustomerDto>> response = new();
-
-             try
-             {
-                 var customers = await _context.Customers
-                     .Where(c => !c.IsDeleted)
-                     .Include(c => c.ApplicationUser)
-                     .Include(c => c.ApprovedByUser)
-                     .Select(c => new CustomerDto
-                     {
-                         CustomerID = c.CustomerID,
-                         ApplicationUserID = c.ApplicationUserID,
-                         UserName = c.ApplicationUser.UserName,
-                         FullName = c.ApplicationUser.FullName,
-                         DateOfBirth = c.DateOfBirth,
-                         Gender = c.Gender,
-                         Occupation = c.Occupation,
-                         MobileNumber = c.MobileNumber,
-                         ApprovedByUserID = c.ApprovedByUserID,
-                         ApprovedByName = c.ApprovedByUser != null ? c.ApprovedByUser.FullName : null,
-                         ApprovalDate = c.ApprovalDate,
-                         AadharNumber = c.AadharNumber,
-                         PAN = c.PAN,
-                         CustomerImageURL = c.CustomerImageURL,
-                         IsActive = c.IsActive
-                     })
-                     .ToListAsync();
-
-                 response.Response = customers;
-             }
-             catch (Exception ex)
-             {
-                 response.Errors.Add(new Errors { ErrorCode = "201", ErrorMessage = ex.Message });
-             }
-
-             return response;
-         }*/
         public async Task<Result<List<CustomerDto>>> GetAllCustomers()
         {
             Result<List<CustomerDto>> response = new();
 
             try
             {
-                // Step 1: Load entities with all related data
                 var customers = await _context.Customers
                     .Where(c => !c.IsDeleted)
                     .Include(c => c.ApplicationUser)
                     .Include(c => c.ApprovedByUser)
-                    .Include(c => c.Accounts)  // ← Include accounts
-                        .ThenInclude(a => a.AccountType)  // ← Include account type
+                    .Include(c => c.Accounts) 
+                    .ThenInclude(a => a.AccountType)  
                     .ToListAsync();
 
-                // Step 2: Map to DTO list after fetching
                 var customerDtos = customers.Select(c => new CustomerDto
                 {
                     CustomerID = c.CustomerID,
@@ -96,7 +55,7 @@ namespace BankApp.Services.Repositories.Implementations
                     CustomerImageURL = c.CustomerImageURL,
                     IsActive = c.IsActive,
                     Accounts = c.Accounts
-                        .Where(a => !a.IsDeleted)  // Only non-deleted accounts
+                        .Where(a => !a.IsDeleted)
                         .Select(a => new AccountDto
                         {
                             AccountID = a.AccountID,
@@ -123,54 +82,6 @@ namespace BankApp.Services.Repositories.Implementations
             return response;
         }
 
-
-        /* public async Task<Result<CustomerDto>> GetCustomerById(int id)
-         {
-             Result<CustomerDto> response = new();
-
-             try
-             {
-                 var customer = await _context.Customers
-                     .Where(c => c.CustomerID == id && !c.IsDeleted)
-                     .Include(c => c.ApplicationUser)
-                     .Include(c => c.ApprovedByUser)
-                     .Select(c => new CustomerDto
-                     {
-                         CustomerID = c.CustomerID,
-                         ApplicationUserID = c.ApplicationUserID,
-                         UserName = c.ApplicationUser.UserName,
-                         FullName = c.ApplicationUser.FullName,
-                         DateOfBirth = c.DateOfBirth,
-                         Gender = c.Gender,
-                         Occupation = c.Occupation,
-                         MobileNumber = c.MobileNumber,
-                         ApprovedByUserID = c.ApprovedByUserID,
-                         ApprovedByName = c.ApprovedByUser != null ? c.ApprovedByUser.FullName : null,
-                         ApprovalDate = c.ApprovalDate,
-                         AadharNumber = c.AadharNumber,
-                         PAN = c.PAN,
-                         CustomerImageURL = c.CustomerImageURL,
-                         IsActive = c.IsActive,
-                     })
-                     .FirstOrDefaultAsync();
-
-                 if (customer == null)
-                 {
-                     response.Errors.Add(new Errors { ErrorCode = "202", ErrorMessage = "Customer not found" });
-                 }
-                 else
-                 {
-                     response.Response = customer;
-                 }
-             }
-             catch (Exception ex)
-             {
-                 response.Errors.Add(new Errors { ErrorCode = "201", ErrorMessage = ex.Message });
-             }
-
-             return response;
-         }*/
-
         public async Task<Result<CustomerDto>> GetCustomerById(int id)
         {
             Result<CustomerDto> response = new();
@@ -181,8 +92,8 @@ namespace BankApp.Services.Repositories.Implementations
                     .Where(c => c.CustomerID == id && !c.IsDeleted)
                     .Include(c => c.ApplicationUser)
                     .Include(c => c.ApprovedByUser)
-                    .Include(c => c.Accounts)  // ← Include accounts
-                        .ThenInclude(a => a.AccountType)  // ← Include account type
+                    .Include(c => c.Accounts)  
+                        .ThenInclude(a => a.AccountType)  
                     .FirstOrDefaultAsync();
 
                 if (customer == null)
@@ -195,7 +106,6 @@ namespace BankApp.Services.Repositories.Implementations
                     return response;
                 }
 
-                // Map to DTO after fetching
                 var customerDto = new CustomerDto
                 {
                     CustomerID = customer.CustomerID,
@@ -214,7 +124,7 @@ namespace BankApp.Services.Repositories.Implementations
                     CustomerImageURL = customer.CustomerImageURL,
                     IsActive = customer.IsActive,
                     Accounts = customer.Accounts
-                        .Where(a => !a.IsDeleted)  // only include non-deleted accounts
+                        .Where(a => !a.IsDeleted)  
                         .Select(a => new AccountDto
                         {
                             AccountID = a.AccountID,
@@ -247,13 +157,12 @@ namespace BankApp.Services.Repositories.Implementations
 
             try
             {
-                // Step 1: Load entity with all related data
                 var customer = await _context.Customers
                     .Where(c => c.ApplicationUserID == userId && !c.IsDeleted)
                     .Include(c => c.ApplicationUser)
                     .Include(c => c.ApprovedByUser)
-                    .Include(c => c.Accounts)  // ← Include accounts
-                        .ThenInclude(a => a.AccountType)  // ← Include account type
+                    .Include(c => c.Accounts)  
+                        .ThenInclude(a => a.AccountType)  
                     .FirstOrDefaultAsync();
 
                 if (customer == null)
@@ -266,7 +175,6 @@ namespace BankApp.Services.Repositories.Implementations
                     return response;
                 }
 
-                // Step 2: Map to DTO after fetching
                 var customerDto = new CustomerDto
                 {
                     CustomerID = customer.CustomerID,
@@ -285,7 +193,7 @@ namespace BankApp.Services.Repositories.Implementations
                     CustomerImageURL = customer.CustomerImageURL,
                     IsActive = customer.IsActive,
                     Accounts = customer.Accounts
-                        .Where(a => !a.IsDeleted)  // Only non-deleted accounts
+                        .Where(a => !a.IsDeleted)  
                         .Select(a => new AccountDto
                         {
                             AccountID = a.AccountID,
@@ -318,7 +226,6 @@ namespace BankApp.Services.Repositories.Implementations
 
             try
             {
-                // Validate that ID in route matches ID in DTO
                 if (id != customerDto.CustomerID)
                 {
                     response.Errors.Add(new Errors
@@ -329,7 +236,6 @@ namespace BankApp.Services.Repositories.Implementations
                     return response;
                 }
 
-                // Load customer WITH ApplicationUser navigation property
                 var customer = await _context.Customers
                     .Include(c => c.ApplicationUser)
                     .FirstOrDefaultAsync(c => c.CustomerID == id);
@@ -344,7 +250,6 @@ namespace BankApp.Services.Repositories.Implementations
                     return response;
                 }
 
-                // Update Customer fields
                 customer.DateOfBirth = customerDto.DateOfBirth;
                 customer.Gender = customerDto.Gender;
                 customer.Occupation = customerDto.Occupation;
@@ -354,13 +259,11 @@ namespace BankApp.Services.Repositories.Implementations
                 customer.ModifiedBy = modifiedBy;
                 customer.ModifiedDate = DateTime.Now;
 
-                // Update ApplicationUser.FullName if provided
                 if (!string.IsNullOrEmpty(customerDto.FullName))
                 {
                     customer.ApplicationUser.FullName = customerDto.FullName;
                 }
 
-                // Save both Customer and ApplicationUser changes
                 await _context.SaveChangesAsync();
                 response.Response = true;
             }
@@ -421,13 +324,11 @@ namespace BankApp.Services.Repositories.Implementations
                     return response;
                 }
 
-                // Deactivate customer
                 customer.IsActive = false;
                 customer.IsDeleted = true;
                 customer.DeletedBy = deletedBy;
                 customer.DeletedDate = DateTime.Now;
 
-                // Deactivate all customer accounts
                 foreach (var account in customer.Accounts.Where(a => !a.IsDeleted))
                 {
                     account.IsActive = false;
@@ -437,7 +338,6 @@ namespace BankApp.Services.Repositories.Implementations
                     account.Status = "Inactive";
                 }
 
-                // Deactivate user in AspNetUsers
                 var user = await _userManager.FindByIdAsync(customer.ApplicationUserID);
                 if (user != null)
                 {

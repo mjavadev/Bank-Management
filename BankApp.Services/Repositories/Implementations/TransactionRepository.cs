@@ -347,7 +347,7 @@ namespace BankApp.Services.Repositories.Implementations
 
                         recipientAccountId = recipientAccount.AccountID;
 
-                        transactionDto.RecipientAccountNumber = recipientAccount.AccountNumber; // Set the number for response
+                        transactionDto.RecipientAccountNumber = recipientAccount.AccountNumber; 
 
                     }
 

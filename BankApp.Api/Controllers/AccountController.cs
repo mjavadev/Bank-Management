@@ -63,8 +63,6 @@ namespace BankApp.Api.Controllers
             return Ok(new { message = "Account Controller is working!", timestamp = DateTime.Now });
         }
     }
-
-    // ⭐ Temporary - define DTO here
     public class ChangePasswordDto
     {
         public string CurrentPassword { get; set; }
